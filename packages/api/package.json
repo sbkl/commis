@@ -1,0 +1,39 @@
+{
+  "name": "@commis/api",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "clean": "git clean -xdf .cache .turbo dist node_modules",
+    "deploy": "bunx convex deploy",
+    "dev": "bun with-env convex dev",
+    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "lint": "eslint",
+    "setup": "convex dev --until-success",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false --project src/convex/tsconfig.json",
+    "with-env": "dotenv -e ../../.env.local --"
+  },
+  "dependencies": {
+    "@auth/core": "0.37.0",
+    "@commis/schemas": "workspace:*",
+    "@convex-dev/auth": "catalog:convex",
+    "@convex-dev/workflow": "^0.2.1",
+    "@hono/zod-validator": "^0.4.3",
+    "convex": "catalog:convex",
+    "convex-helpers": "catalog:convex",
+    "date-fns": "catalog:",
+    "hono": "^4.7.2",
+    "slug": "^10.0.0"
+  },
+  "devDependencies": {
+    "@commis/eslint-config": "workspace:^",
+    "@commis/typescript-config": "workspace:*",
+    "@types/node": "catalog:",
+    "@types/slug": "^5.0.9",
+    "dotenv-cli": "catalog:",
+    "eslint": "catalog:",
+    "prettier": "catalog:",
+    "typescript": "catalog:",
+    "zod": "catalog:"
+  }
+}

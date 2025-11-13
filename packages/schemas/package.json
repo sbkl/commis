@@ -1,0 +1,28 @@
+{
+  "name": "@commis/schemas",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts",
+    "./types/*": "./src/types/*.ts"
+  },
+  "scripts": {
+    "lint": "eslint . --max-warnings 0",
+    "sort": "npx sort-package-json",
+    "typecheck": "tsc --noEmit"
+  },
+  "prettier": "@linkreach/prettier-config",
+  "dependencies": {
+    "convex": "catalog:convex",
+    "convex-helpers": "catalog:convex",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@commis/eslint-config": "workspace:^",
+    "@commis/typescript-config": "workspace:*",
+    "eslint": "catalog:",
+    "prettier": "catalog:",
+    "typescript": "catalog:"
+  }
+}

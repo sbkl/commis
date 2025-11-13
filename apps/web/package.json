@@ -1,32 +1,47 @@
 {
-  "name": "web",
+  "name": "@commis/web",
   "version": "0.0.1",
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "clean": "git clean -xdf .cache .next .turbo node_modules",
+    "dev": "bun with-env next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "with-env": "dotenv -e ../../.env.local --"
   },
   "dependencies": {
-    "@workspace/ui": "workspace:*",
-    "lucide-react": "^0.475.0",
-    "next": "^15.4.5",
-    "next-themes": "^0.4.6",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "@commis/api": "workspace:*",
+    "@commis/schemas": "workspace:*",
+    "@commis/ui": "workspace:*",
+    "@convex-dev/auth": "catalog:convex",
+    "@convex-dev/react-query": "^0.0.0-alpha.11",
+    "@tanstack/react-query": "^5.90.7",
+    "convex": "catalog:convex",
+    "convex-helpers": "catalog:convex",
+    "date-fns": "catalog:",
+    "lucide-react": "catalog:ui",
+    "next": "^16.0.2",
+    "next-themes": "catalog:ui",
+    "react": "catalog:react",
+    "react-dom": "catalog:react",
+    "react-icons": "^5.5.0",
+    "react-resizable-panels": "^3.0.6",
+    "sonner": "catalog:ui",
+    "zod": "catalog:"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.1.11",
-    "@types/node": "^20.19.9",
-    "@types/react": "^19.1.9",
-    "@types/react-dom": "^19.1.7",
-    "@workspace/eslint-config": "workspace:^",
-    "@workspace/typescript-config": "workspace:*",
-    "eslint": "^9.32.0",
-    "typescript": "^5.9.2"
+    "@tailwindcss/postcss": "catalog:ui",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:react",
+    "@types/react-dom": "catalog:react",
+    "@commis/eslint-config": "workspace:*",
+    "@commis/typescript-config": "workspace:*",
+    "dotenv-cli": "catalog:",
+    "eslint": "catalog:",
+    "typescript": "catalog:"
   }
 }
