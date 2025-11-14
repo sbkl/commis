@@ -11,7 +11,15 @@ export const frameworkSchema = z.enum([
 
 export const packageManagerSchema = z.enum(["bun", "npm", "pnpm", "yarn"]);
 
-export const projectStatusSchema = z.enum(["create", "update", "delete"]);
+export const projectStatusSchema = z.enum(["create", "update", "delete", "creating", "updating", "deleting", "created", "updated", "deleted"]);
+
+export const stepSchema = z.enum([
+  "Initializing project", 
+  "Installing framework",
+  "Setting up Convex", 
+  "Installing shadcn",
+  "Configuring TypeScript",
+]);
 
 export const projectSchema = z.object({
   userId: zid("users"),
@@ -20,4 +28,5 @@ export const projectSchema = z.object({
   framework: frameworkSchema,
   packageManager: packageManagerSchema,
   status: projectStatusSchema,
+  currentStep: stepSchema.optional()
 });

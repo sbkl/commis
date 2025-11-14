@@ -94,7 +94,7 @@ export async function onQueryUpdate<
 >(
   query: Query,
   args: Args,
-  callback: (value: FunctionReturnType<Query>) => void
+  callback: (value: FunctionReturnType<Query>) => void | Promise<void>
 ): Promise<ReturnType<typeof client.onUpdate<Query>>> {
   return withTokenRefresh(async (token) => {
     return client.onUpdate(

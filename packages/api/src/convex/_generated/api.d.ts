@@ -22,6 +22,7 @@ import type * as cliAuth_table from "../cliAuth/table.js";
 import type * as env from "../env.js";
 import type * as functions from "../functions.js";
 import type * as http from "../http.js";
+import type * as projects_cli_mutation from "../projects/cli/mutation.js";
 import type * as projects_cli_query from "../projects/cli/query.js";
 import type * as projects_mutation from "../projects/mutation.js";
 import type * as projects_query from "../projects/query.js";
@@ -56,6 +57,7 @@ declare const fullApi: ApiFromModules<{
   env: typeof env;
   functions: typeof functions;
   http: typeof http;
+  "projects/cli/mutation": typeof projects_cli_mutation;
   "projects/cli/query": typeof projects_cli_query;
   "projects/mutation": typeof projects_mutation;
   "projects/query": typeof projects_query;
