@@ -1,6 +1,6 @@
 import slug from "slug";
-import { ProtectedMutationCtx } from "../types/functions";
-import { TableNames } from "../_generated/dataModel";
+import type { ProtectedMutationCtx } from "../types/functions";
+import type { TableNames } from "../_generated/dataModel";
 
 interface GenerateSlugProps {
   value: string;

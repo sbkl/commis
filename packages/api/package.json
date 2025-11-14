@@ -23,11 +23,14 @@
     "convex-helpers": "catalog:convex",
     "date-fns": "catalog:",
     "hono": "^4.7.2",
+    "jose": "^6.1.1",
+    "jsonwebtoken": "^9.0.2",
     "slug": "^10.0.0"
   },
   "devDependencies": {
     "@commis/eslint-config": "workspace:^",
     "@commis/typescript-config": "workspace:*",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "catalog:",
     "@types/slug": "^5.0.9",
     "dotenv-cli": "catalog:",

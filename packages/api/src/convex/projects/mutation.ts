@@ -23,6 +23,7 @@ export const create = protectedMutation({
       ...args,
       userId: ctx.user._id,
       slug,
+      status: "create",
     });
     return slug;
   },

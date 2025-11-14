@@ -1,3 +1,4 @@
+import { zid } from "convex-helpers/server/zod";
 import { z } from "zod/v3";
 
 export const userSchema = z.object({
@@ -10,4 +11,10 @@ export const userSchema = z.object({
   emailVerificationTime: z.number().optional(),
   isAnonymous: z.boolean().optional(),
   deactivatedAt: z.number().optional(),
+});
+
+export const userWorkingDirectorySchema = z.object({
+  userId: zid("users"),
+  device: z.string(),
+  directory: z.string(),
 });

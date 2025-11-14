@@ -12,7 +12,7 @@ import {
   publicMutation,
   publicQuery,
 } from "../functions";
-import { CustomCtx } from "convex-helpers/server/customFunctions";
+import type { CustomCtx } from "convex-helpers/server/customFunctions";
 
 export type PublicQueryCtx = CustomCtx<typeof publicQuery>;
 export type ProtectedQueryCtx = CustomCtx<typeof protectedQuery>;

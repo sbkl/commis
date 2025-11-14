@@ -2,11 +2,13 @@
 
 import { Authenticated } from "convex/react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import { useProject } from "./projects/provider";
 
 interface EditorProps {
   defaultLayout: number[];
 }
 export function Editor({ defaultLayout = [20, 100] }: EditorProps) {
+  const { project } = useProject();
   const onLayout = (sizes: number[]) => {
     document.cookie = `react-resizable-panels:layout=${JSON.stringify(sizes)}`;
   };
@@ -25,7 +27,9 @@ export function Editor({ defaultLayout = [20, 100] }: EditorProps) {
         </Panel>
         <PanelResizeHandle className="bg-border/50  w-1 hover:cursor-col-resize" />
         <Panel defaultSize={defaultLayout[1]} minSize={10} collapsible>
-          <div className=" w-full h-full"></div>
+          <div className=" w-full h-full">
+            <h1>{project.name}</h1>
+          </div>
         </Panel>
       </PanelGroup>
     </Authenticated>

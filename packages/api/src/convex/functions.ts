@@ -1,11 +1,11 @@
 import {
-  Rules,
+  type Rules,
   wrapDatabaseReader,
   wrapDatabaseWriter,
 } from "convex-helpers/server/rowLevelSecurity";
-import { ConvexError } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { Triggers } from "convex-helpers/server/triggers";
-import { DataModel, Doc } from "./_generated/dataModel";
+import type { DataModel, Doc } from "./_generated/dataModel";
 import * as VanillaConvex from "./_generated/server";
 import * as ConvexBase from "./_generated/server";
 import { getActCurrentUser, getCurrentUser } from "./users/utils";
@@ -15,6 +15,7 @@ import {
   customMutation,
   customQuery,
 } from "convex-helpers/server/customFunctions";
+import { hashToken } from "./apiTokens/utils";
 
 export const triggers = new Triggers<DataModel>();
 
@@ -25,6 +26,97 @@ async function rlsRules(ctx: ConvexBase.QueryCtx) {
     user,
   };
 }
+
+export const cliProtectedQuery = customQuery(ConvexBase.query, {
+  args: {
+    token: v.optional(v.string()),
+  },
+  async input(ctx, args) {
+    if (!args.token) {
+      throw new ConvexError("Token is required");
+    }
+
+    // Hash the token and verify it against the database
+
+    const tokenHash = await hashToken(args.token);
+
+    const apiToken = await ctx.db
+      .query("apiTokens")
+      .withIndex("token", (q) => q.eq("token", tokenHash))
+      .first();
+
+    if (!apiToken) {
+      throw new ConvexError("Invalid or expired token");
+    }
+
+    // Check if token is expired (if expiresAt is set)
+    if (apiToken.expiresAt && apiToken.expiresAt < Date.now()) {
+      throw new ConvexError("Token has expired");
+    }
+
+    const user = await ctx.db.get(apiToken.userId);
+    if (!user) {
+      throw new ConvexError("User not found");
+    }
+
+    return {
+      ctx: {
+        ...ctx,
+        user,
+        apiToken,
+      },
+      args,
+    };
+  },
+});
+
+export const cliProtectedMutation = customMutation(ConvexBase.mutation, {
+  args: {
+    token: v.optional(v.string()),
+  },
+  async input(ctx, args) {
+    if (!args.token) {
+      throw new ConvexError("Token is required");
+    }
+
+    // Hash the token and verify it against the database
+
+    const tokenHash = await hashToken(args.token);
+
+    const apiToken = await ctx.db
+      .query("apiTokens")
+      .withIndex("token", (q) => q.eq("token", tokenHash))
+      .first();
+
+    if (!apiToken) {
+      throw new ConvexError("Invalid or expired token");
+    }
+
+    // Check if token is expired (if expiresAt is set)
+    if (apiToken.expiresAt && apiToken.expiresAt < Date.now()) {
+      throw new ConvexError("Token has expired");
+    }
+
+    const user = await ctx.db.get(apiToken.userId);
+    if (!user) {
+      throw new ConvexError("User not found");
+    }
+
+    // Update last used timestamp
+    await ctx.db.patch(apiToken._id, {
+      lastUsedAt: Date.now(),
+    });
+
+    return {
+      ctx: {
+        ...ctx,
+        user,
+        apiToken,
+      },
+      args,
+    };
+  },
+});
 
 export const publicQuery = customQuery(
   VanillaConvex.query,
