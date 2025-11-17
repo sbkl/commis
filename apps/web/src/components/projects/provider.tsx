@@ -6,7 +6,10 @@ import { api } from "@commis/api/src/convex/_generated/api";
 import { Preloaded, usePreloadedQuery } from "convex/react";
 
 interface ProjectContextProps {
-  project: typeof api.projects.query.protectedFindOrThrow._returnType;
+  isDashboardOpen: boolean;
+  setIsDashboardOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  project: (typeof api.projects.query.protectedFindOrThrow._returnType)["project"];
+  uiComponents: (typeof api.projects.query.protectedFindOrThrow._returnType)["uiComponents"];
 }
 
 interface ProjectProviderProps {
@@ -23,8 +26,20 @@ export function ProjectProvider({
   children,
   preloadedProjectQuery,
 }: ProjectProviderProps) {
-  const project = usePreloadedQuery(preloadedProjectQuery);
-  return <ProjectContext value={{ project }}>{children}</ProjectContext>;
+  const projectQuery = usePreloadedQuery(preloadedProjectQuery);
+  const [isDashboardOpen, setIsDashboardOpen] = React.useState(false);
+  return (
+    <ProjectContext
+      value={{
+        isDashboardOpen,
+        setIsDashboardOpen,
+        project: projectQuery.project,
+        uiComponents: projectQuery.uiComponents,
+      }}
+    >
+      {children}
+    </ProjectContext>
+  );
 }
 
 export function useProject() {

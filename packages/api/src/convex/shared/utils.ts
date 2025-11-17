@@ -1,16 +1,13 @@
 import slug from "slug";
-import type { ProtectedMutationCtx } from "../types/functions";
 import type { TableNames } from "../_generated/dataModel";
+import type { MutationCtx } from "../_generated/server";
 
 interface GenerateSlugProps {
   value: string;
   table: string;
 }
 
-export async function generateSlug(
-  ctx: ProtectedMutationCtx,
-  args: GenerateSlugProps
-) {
+export async function generateSlug(ctx: MutationCtx, args: GenerateSlugProps) {
   const baseSlug = slug(args.value, {
     lower: true,
     trim: true,

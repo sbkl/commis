@@ -6,6 +6,14 @@ export const findById = internalQuery({
     userId: v.id("users"),
   },
   handler: async (ctx, { userId }) => {
-    return await ctx.db.get(userId);
+    const user = await ctx.db.get(userId);
+    const config = await ctx.db
+      .query("userConfigs")
+      .withIndex("userId", (q) => q.eq("userId", userId))
+      .unique();
+    return {
+      ...user,
+      config,
+    };
   },
 });

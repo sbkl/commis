@@ -1,4 +1,3 @@
-import { AppNavbar } from "@/components/app-navbar";
 import { ManagedAuth } from "@/components/auth/managed-auth";
 import { UserProvider } from "@/components/auth/user-provider";
 import { SidebarProvider } from "@commis/ui/components/sidebar";
@@ -22,10 +21,7 @@ export default async function AppLayout({
     <UserProvider preloadedUserQuery={preloadedUserQuery}>
       <ManagedAuth>
         <SidebarProvider className="h-full w-full">
-          <div className="w-full h-full pt-12">
-            <AppNavbar />
-            {children}
-          </div>
+          <div className="w-full h-full pt-12">{children}</div>
         </SidebarProvider>
       </ManagedAuth>
     </UserProvider>

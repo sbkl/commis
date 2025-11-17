@@ -31,14 +31,14 @@ export async function login(): Promise<void> {
     );
 
     console.log("Please verify this device:");
-    console.log(`\n  Code: ${deviceFlow.userCode}\n`);
+    console.log(`\n  Code: ${deviceFlow.code}\n`);
     console.log(
-      `Opening browser to: ${deviceFlow.verificationUrl}?userCode=${deviceFlow.userCode}`
+      `Opening browser to: ${deviceFlow.verificationUrl}?code=${deviceFlow.code}`
     );
     console.log("\nWaiting for verification...");
 
     // Open browser
-    const url = `${deviceFlow.verificationUrl}?userCode=${deviceFlow.userCode}`;
+    const url = `${deviceFlow.verificationUrl}?code=${deviceFlow.code}`;
     await openBrowser(url);
 
     // Poll for verification

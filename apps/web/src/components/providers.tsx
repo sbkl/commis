@@ -10,6 +10,7 @@ import {
 } from "@tanstack/react-query";
 import { ConvexReactClient } from "convex/react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 import { Toaster } from "@commis/ui/components/sonner";
 
@@ -61,7 +62,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     >
       <ConvexAuthNextjsProvider client={convex}>
         <QueryClientProvider client={queryClient}>
-          {children}
+          <NuqsAdapter>{children}</NuqsAdapter>
           <Toaster />
         </QueryClientProvider>
       </ConvexAuthNextjsProvider>

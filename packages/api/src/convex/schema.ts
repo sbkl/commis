@@ -1,16 +1,26 @@
 import { defineSchema } from "convex/server";
 import { authTables } from "@convex-dev/auth/server";
-import { Users, UserWorkingDirectories } from "./users/table";
+import { UserConfigs, Users, UserWorkingDirectories } from "./users/table";
 import { Projects } from "./projects/table";
 import { CliAuthSessions } from "./cliAuth/table";
 import { ApiTokens } from "./apiTokens/table";
+import { UiComponents, UiComponentsOnProjects } from "./uiComponents/table";
+import { CodeFeatures, CodeFeatureFiles } from "./codeFeatures/table";
 
 const schema = defineSchema({
   ...authTables,
   users: Users.table.index("email", ["email"]),
-  projects: Projects.table.index("slug", ["slug", "userId"]),
+  userConfigs: UserConfigs.table.index("userId", ["userId"]),
+  projects: Projects.table
+    .index("slug", ["slug", "userId"])
+    .index("userId", ["userId"])
+    .index("status", ["status", "userId"])
+    .searchIndex("name", {
+      searchField: "name",
+      filterFields: ["userId"],
+    }),
   cliAuthSessions: CliAuthSessions.table
-    .index("userCode", ["userCode"])
+    .index("code", ["code"])
     .index("deviceCode", ["deviceCode"]),
   apiTokens: ApiTokens.table
     .index("token", ["token"])
@@ -21,6 +31,19 @@ const schema = defineSchema({
     "userId",
     "device",
   ]),
+  uiComponents: UiComponents.table.index("vendor_name", ["vendor", "name"]),
+  uiComponentsOnProjects: UiComponentsOnProjects.table
+    .index("projectId", ["projectId"])
+    .index("userId_status", ["userId", "status"]),
+  codeFeatures: CodeFeatures.table
+    .index("slug", ["slug"])
+    .index("userId", ["userId"]),
+  codeFeatureFiles: CodeFeatureFiles.table.index("codeFeatureId", [
+    "codeFeatureId",
+  ]),
+  // authenticationProviders: AuthenticationProviders.table.index("provider", [
+  //   "provider",
+  // ]),
 });
 
 export default schema;

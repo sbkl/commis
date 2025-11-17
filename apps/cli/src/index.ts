@@ -1,15 +1,15 @@
-import "./functions/env";
-import { dev } from "./functions/dev";
-import { init } from "./functions/init";
-import { login } from "./functions/login";
-import { logout } from "./functions/logout";
-import { whoami } from "./functions/whoami";
+import "./commands/env";
+import { dev } from "./commands/dev";
+import { init } from "./commands/init";
+import { login } from "./commands/login";
+import { logout } from "./commands/logout";
+import { whoami } from "./commands/whoami";
 import {
   showConfig,
   setConfig,
   getConfig,
   listDevices,
-} from "./functions/config";
+} from "./commands/config";
 
 if (require.main === module) {
   if (process.argv[2] === "dev") {

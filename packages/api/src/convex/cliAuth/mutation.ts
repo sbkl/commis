@@ -10,21 +10,21 @@ export const generateDeviceCode = publicMutation({
   handler: async (ctx) => {
     // Generate random codes
     const deviceCode = generateRandomCode(32);
-    const userCode = generateRandomCode(8).toUpperCase();
+    const code = generateRandomCode(8).toUpperCase();
 
     // Expire in 10 minutes
     const expiresAt = Date.now() + 10 * 60 * 1000;
 
     await ctx.db.insert("cliAuthSessions", {
       deviceCode,
-      userCode,
+      code,
       expiresAt,
       verified: false,
     });
 
     return {
       deviceCode,
-      userCode,
+      code,
       expiresAt,
       verificationUrl: `${env.SITE_URL}/auth/device`,
     };
@@ -34,16 +34,16 @@ export const generateDeviceCode = publicMutation({
 // Verify a device code after user has authenticated
 export const verifyDeviceCode = protectedMutation({
   args: {
-    userCode: v.string(),
+    code: v.string(),
   },
   handler: async (ctx, args) => {
     const session = await ctx.db
       .query("cliAuthSessions")
-      .withIndex("userCode", (q) => q.eq("userCode", args.userCode))
+      .withIndex("code", (q) => q.eq("code", args.code))
       .first();
 
     if (!session) {
-      throw new ConvexError("Invalid user code");
+      throw new ConvexError("Invalid code");
     }
 
     if (session.expiresAt < Date.now()) {

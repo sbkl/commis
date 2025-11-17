@@ -18,9 +18,9 @@ import { toast } from "sonner";
 
 export default function DeviceAuthPage() {
   const searchParams = useSearchParams();
-  const userCodeFromUrl = searchParams.get("userCode");
+  const codeParam = searchParams.get("code");
 
-  const [userCode, setUserCode] = useState(userCodeFromUrl || "");
+  const [code, setCode] = useState(codeParam || "");
   const [submitted, setSubmitted] = useState(false);
 
   const verifyMutation = useMutation(api.cliAuth.mutation.verifyDeviceCode, {
@@ -36,14 +36,14 @@ export default function DeviceAuthPage() {
   });
 
   useEffect(() => {
-    if (userCodeFromUrl) {
-      setUserCode(userCodeFromUrl.toUpperCase());
+    if (codeParam) {
+      setCode(codeParam.toUpperCase());
     }
-  }, [userCodeFromUrl]);
+  }, [codeParam]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    verifyMutation.mutate({ userCode: userCode.trim().toUpperCase() });
+    verifyMutation.mutate({ code: code.trim().toUpperCase() });
   }
 
   if (submitted) {
@@ -78,8 +78,8 @@ export default function DeviceAuthPage() {
                 id="code"
                 type="text"
                 placeholder="XXXXXXXX"
-                value={userCode}
-                onChange={(e) => setUserCode(e.target.value)}
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
                 className="font-mono text-lg uppercase"
                 maxLength={8}
                 required

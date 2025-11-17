@@ -23,14 +23,21 @@ import { api } from "@commis/api/src/convex/_generated/api";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
-export function NewProjectSheet() {
+interface NewProjectSheetProps {
+  children?: React.ReactNode;
+}
+export function NewProjectSheet({ children }: NewProjectSheetProps) {
   const [open, setOpen] = React.useState(false);
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" tooltip="New Project">
-          <Plus className="size-4" />
-        </Button>
+        {children ? (
+          children
+        ) : (
+          <Button variant="ghost" size="icon" tooltip="New Project">
+            <Plus className="size-4" />
+          </Button>
+        )}
       </SheetTrigger>
       <SheetContent className="pt-6">
         <SheetHeader className="px-6">

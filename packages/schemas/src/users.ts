@@ -18,3 +18,10 @@ export const userWorkingDirectorySchema = z.object({
   device: z.string(),
   directory: z.string(),
 });
+
+export const userConfigSchema = z.object({
+  userId: zid("users"),
+  convexTeamSlug: z.string(),
+  convexTeamId: z.number(),
+  convexAccessToken: z.string(),
+});

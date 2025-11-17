@@ -2,6 +2,7 @@ import { createHash } from "crypto";
 import os from "os";
 import { query, mutation, getCurrentUser } from "./auth";
 import { api } from "@commis/api/src/convex/_generated/api";
+import * as fs from "fs-extra";
 
 /**
  * Get device information for device identification
@@ -48,16 +49,34 @@ function getPlatformName(platform: string): string {
 /**
  * Get the working directory for the current device
  */
-export async function getWorkingDirectory(): Promise<string | null> {
+export async function getWorkingDirectory(): Promise<string> {
   const { deviceId } = getDeviceInfo();
 
   try {
-    return await query(api.users.cli.query.getWorkingDirectory, {
+    let workingDir = await query(api.users.cli.query.getWorkingDirectory, {
       deviceId,
     });
+    if (workingDir) {
+      // Ensure the working directory exists
+      if (!(await fs.pathExists(workingDir))) {
+        console.log(`  📁 Creating working directory: ${workingDir}`);
+        await fs.ensureDir(workingDir);
+      }
+      return workingDir;
+    }
+    workingDir = "commis";
+    if (!(await fs.pathExists(workingDir))) {
+      console.log(`  📁 Creating working directory: ${workingDir}`);
+      await fs.ensureDir(workingDir);
+    }
+    return workingDir;
   } catch (error) {
-    console.error("Failed to get working directory:", error);
-    return null;
+    const workingDir = "commis";
+    if (!(await fs.pathExists(workingDir))) {
+      console.log(`  📁 Creating working directory: ${workingDir}`);
+      await fs.ensureDir(workingDir);
+    }
+    return workingDir;
   }
 }
 

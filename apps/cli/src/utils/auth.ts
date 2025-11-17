@@ -34,7 +34,9 @@ async function withTokenRefresh<T>(
     // Operation failed, try to refresh token
     if (refreshToken) {
       try {
-        const refreshResult = await mutation(
+        // Use client.mutation directly to avoid adding token parameter
+        // refreshAccessToken is a public mutation that only needs refreshToken
+        const refreshResult = await client.mutation(
           api.cliAuth.mutation.refreshAccessToken,
           { refreshToken }
         );

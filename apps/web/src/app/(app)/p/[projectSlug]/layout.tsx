@@ -1,3 +1,4 @@
+import { ProjectHeader } from "@/components/headers/project-header";
 import { ProjectProvider } from "@/components/projects/provider";
 import { api } from "@commis/api/src/convex/_generated/api";
 import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
@@ -9,21 +10,22 @@ export default async function ProjectLayout({
   params,
 }: {
   children: React.ReactNode;
-  params: Promise<{ slug: string }>;
+  params: Promise<{ projectSlug: string }>;
 }) {
-  const { slug } = await params;
+  const { projectSlug } = await params;
   const token = await convexAuthNextjsToken();
   if (!token) {
     redirect("/auth");
   }
   const preloadedProjectQuery = await preloadQuery(
     api.projects.query.protectedFindOrThrow,
-    { slug },
+    { slug: projectSlug },
     { token }
   );
 
   return (
     <ProjectProvider preloadedProjectQuery={preloadedProjectQuery}>
+      <ProjectHeader />
       {children}
     </ProjectProvider>
   );

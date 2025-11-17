@@ -9,7 +9,10 @@ import {
   FieldContent,
   FieldDescription,
   FieldError,
+  FieldGroup,
   FieldLabel,
+  FieldLegend,
+  FieldSet,
   FieldTitle,
 } from "@commis/ui/components/field";
 import {
@@ -32,6 +35,7 @@ import {
 } from "@commis/ui/components/select";
 import { ScrollArea } from "@commis/ui/components/scroll-area";
 import { RadioGroup, RadioGroupItem } from "@commis/ui/components/radio-group";
+import { Checkbox } from "./checkbox";
 
 export const { fieldContext, useFieldContext, formContext, useFormContext } =
   createFormHookContexts();
@@ -390,6 +394,132 @@ export function RadioGroupField<
   );
 }
 
+interface CheckboxFieldProps extends React.ComponentProps<typeof Checkbox> {
+  label: string;
+  description?: string;
+}
+
+export function CheckboxField({
+  label,
+  description,
+  ...props
+}: CheckboxFieldProps) {
+  const field = useFieldContext<boolean>();
+  const hasErrors = field.state.meta.errors.length > 0;
+
+  return (
+    <Field orientation="horizontal" data-invalid={hasErrors}>
+      <Checkbox
+        data-invalid={hasErrors}
+        checked={field.state.value}
+        onCheckedChange={(checked) => field.handleChange(Boolean(checked))}
+        {...props}
+      />
+      <FieldContent>
+        <FieldLabel htmlFor="finder-pref-9k2-sync-folders-nep">
+          {label}
+        </FieldLabel>
+        {description ? (
+          <FieldDescription>{description}</FieldDescription>
+        ) : null}
+      </FieldContent>
+    </Field>
+  );
+}
+
+interface CheckboxArrayFieldProps<
+  T extends { label: string; description?: string; value: string },
+> {
+  options: T[];
+  label?: string;
+  description?: string;
+  container?: (children: React.ReactNode) => React.ReactNode;
+  tag?: React.ReactNode | ((option: T) => React.ReactNode);
+}
+
+export function CheckboxArrayField<
+  T extends { label: string; description?: string; value: string },
+>({ label, description, options, container, tag }: CheckboxArrayFieldProps<T>) {
+  const field = useFieldContext<T[]>();
+  const hasErrors = field.state.meta.errors.length > 0;
+
+  const content = (
+    <>
+      {options.map((option) => {
+        const renderedTag = tag
+          ? typeof tag === "function"
+            ? tag(option)
+            : tag
+          : null;
+        return (
+          <Field
+            key={option.value}
+            orientation="horizontal"
+            data-invalid={hasErrors}
+          >
+            <div className="shrink-0">
+              {renderedTag ? (
+                renderedTag
+              ) : (
+                <Checkbox
+                  id={`form-tanstack-checkbox-${option.value}`}
+                  name={field.name}
+                  aria-invalid={hasErrors}
+                  defaultChecked={field.state.value
+                    .map((v) => v.value)
+                    .includes(option.value)}
+                  checked={field.state.value
+                    .map((v) => v.value)
+                    .includes(option.value)}
+                  onCheckedChange={(checked) => {
+                    console.log("checked", checked);
+                    if (checked) {
+                      field.pushValue(option);
+                    } else {
+                      const index = field.state.value
+                        .map((v) => v.value)
+                        .indexOf(option.value);
+                      if (index > -1) {
+                        field.removeValue(index);
+                      }
+                    }
+                  }}
+                />
+              )}
+            </div>
+
+            <FieldContent>
+              <div className="flex items-center gap-2 w-full">
+                <FieldLabel
+                  htmlFor={`form-tanstack-checkbox-${option.value}`}
+                  className="font-normal"
+                >
+                  {option.label}
+                </FieldLabel>
+              </div>
+              <FieldDescription>{option.description}</FieldDescription>
+            </FieldContent>
+          </Field>
+        );
+      })}
+    </>
+  );
+  return (
+    <FieldSet className="gap-0">
+      {label ? <FieldLegend variant="label">{label}</FieldLegend> : null}
+      {description ? <FieldDescription>{description}</FieldDescription> : null}
+      <FieldGroup data-slot="checkbox-group">
+        {typeof container === "function" ? (
+          container(content)
+        ) : (
+          <div>{content}</div>
+        )}
+      </FieldGroup>
+      {hasErrors && <FieldError errors={field.state.meta.errors} />}
+    </FieldSet>
+  );
+}
+
 export const { useAppForm, withForm } = createFormHook({
   fieldComponents: {
     TextField,
@@ -397,6 +527,8 @@ export const { useAppForm, withForm } = createFormHook({
     ButtonGroupTextField,
     SelectField,
     RadioGroupField,
+    CheckboxField,
+    CheckboxArrayField,
   },
   formComponents: {
     // SubscribeButton,
