@@ -6,6 +6,7 @@ import { CliAuthSessions } from "./cliAuth/table";
 import { ApiTokens } from "./apiTokens/table";
 import { UiComponents, UiComponentsOnProjects } from "./uiComponents/table";
 import { CodeFeatures, CodeFeatureFiles } from "./codeFeatures/table";
+import { Authentications } from "./authentications/table";
 
 const schema = defineSchema({
   ...authTables,
@@ -19,6 +20,10 @@ const schema = defineSchema({
       searchField: "name",
       filterFields: ["userId"],
     }),
+  authentications: Authentications.table
+    .index("projectId", ["projectId"])
+    .index("userId", ["userId"])
+    .index("status", ["status", "userId"]),
   cliAuthSessions: CliAuthSessions.table
     .index("code", ["code"])
     .index("deviceCode", ["deviceCode"]),
@@ -31,9 +36,16 @@ const schema = defineSchema({
     "userId",
     "device",
   ]),
-  uiComponents: UiComponents.table.index("vendor_name", ["vendor", "name"]),
+  uiComponents: UiComponents.table
+    .index("vendor", ["vendor"])
+    .index("vendor_name", ["vendor", "name"])
+    .searchIndex("name", {
+      searchField: "name",
+      filterFields: ["vendor"],
+    }),
   uiComponentsOnProjects: UiComponentsOnProjects.table
     .index("projectId", ["projectId"])
+    .index("projectId_uiComponentId", ["projectId", "uiComponentId"])
     .index("userId_status", ["userId", "status"]),
   codeFeatures: CodeFeatures.table
     .index("slug", ["slug"])

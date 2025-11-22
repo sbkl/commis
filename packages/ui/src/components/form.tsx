@@ -2,8 +2,9 @@ import * as React from "react";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 
 import { cn } from "@commis/ui/lib/utils";
-import { CheckCircle, LucideIcon } from "lucide-react";
+import { CheckCircle, Copy, ExternalLink, LucideIcon } from "lucide-react";
 import { Input } from "@commis/ui/components/input";
+import { Card, CardContent } from "@commis/ui/components/card";
 import {
   Field,
   FieldContent,
@@ -96,7 +97,7 @@ interface TextareaFieldProps extends React.ComponentProps<typeof Textarea> {
   description?: string;
 }
 
-export function TextareaField({
+function TextareaField({
   label,
   fieldClassName,
   description,
@@ -292,7 +293,7 @@ interface RadioGroupFieldProps<
   activeValueLabel?: string;
 }
 
-export function RadioGroupField<
+function RadioGroupField<
   T extends {
     label: string;
     description?: string;
@@ -399,11 +400,7 @@ interface CheckboxFieldProps extends React.ComponentProps<typeof Checkbox> {
   description?: string;
 }
 
-export function CheckboxField({
-  label,
-  description,
-  ...props
-}: CheckboxFieldProps) {
+function CheckboxField({ label, description, ...props }: CheckboxFieldProps) {
   const field = useFieldContext<boolean>();
   const hasErrors = field.state.meta.errors.length > 0;
 
@@ -437,7 +434,7 @@ interface CheckboxArrayFieldProps<
   tag?: React.ReactNode | ((option: T) => React.ReactNode);
 }
 
-export function CheckboxArrayField<
+function CheckboxArrayField<
   T extends { label: string; description?: string; value: string },
 >({ label, description, options, container, tag }: CheckboxArrayFieldProps<T>) {
   const field = useFieldContext<T[]>();
@@ -520,6 +517,171 @@ export function CheckboxArrayField<
   );
 }
 
+interface GithubAuthProviderFieldProps {
+  applicationName: string;
+  homepageUrl: string;
+  authorisationCallbackUrl: string;
+}
+
+function CopyableField({ label, value }: { label: string; value: string }) {
+  const [copied, setCopied] = React.useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy text:", err);
+    }
+  };
+
+  return (
+    <div className="grid grid-cols-3 gap-2">
+      <span className="text-xs text-muted-foreground/70 shrink-0 col-span-1 py-1">
+        {label}
+      </span>
+      <button
+        type="button"
+        onClick={handleCopy}
+        className={cn(
+          "col-span-2 flex items-center text-xs font-mono px-2 py-1 rounded-md transition-colors w-full max-w-full overflow-hidden",
+          "hover:bg-accent cursor-pointer",
+          copied ? "bg-accent" : ""
+        )}
+      >
+        <span className="truncate flex-1 text-left min-w-0 mr-2">{value}</span>
+        {copied ? (
+          <CheckCircle className="h-3.5 w-3.5 shrink-0 text-green-600" />
+        ) : (
+          <Copy className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+        )}
+      </button>
+    </div>
+  );
+}
+
+function GithubAuthProviderField({
+  applicationName,
+  homepageUrl,
+  authorisationCallbackUrl,
+}: GithubAuthProviderFieldProps) {
+  const field = useFieldContext<{
+    clientId: string;
+    clientSecret: string;
+  }>();
+
+  return (
+    <FieldGroup>
+      <FieldSet>
+        <FieldLegend>GitHub OAuth Setup</FieldLegend>
+
+        <div className="space-y-6">
+          {/* Instructions Card */}
+          <Card className="bg-muted/20 border-muted/40 py-3">
+            <CardContent className="space-y-4 text-sm text-muted-foreground px-3">
+              {/* Step 1 */}
+              <div className="flex gap-2">
+                <span className="shrink-0">1-</span>
+                <div className="flex-1 min-w-0">
+                  <a
+                    href="https://github.com/settings/applications/new"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 hover:underline"
+                  >
+                    Open Github OAuth form
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
+              </div>
+
+              {/* Step 2 */}
+              <div className="flex flex-col gap-2">
+                <div className="flex gap-2">
+                  <span className="shrink-0">2-</span>
+                  <div>Copy/Paste these values</div>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <div className="flex-1 min-w-0">
+                    <Card className="py-1.5">
+                      <CardContent className="px-3">
+                        <CopyableField
+                          label="Application Name"
+                          value={applicationName}
+                        />
+                        <CopyableField
+                          label="Homepage URL"
+                          value={homepageUrl}
+                        />
+                        <CopyableField
+                          label="Callback"
+                          value={authorisationCallbackUrl}
+                        />
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 3 */}
+              <div className="flex gap-2">
+                <span className="shrink-0">3-</span>
+                <div className="flex-1">Generate a Client Secret</div>
+              </div>
+
+              {/* Step 4 */}
+              <div className="flex gap-2">
+                <span className="shrink-0">4-</span>
+                <div className="flex-1">
+                  Type in the Client ID and Secret below
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Input Section */}
+          <FieldGroup>
+            <Field>
+              <FieldLabel htmlFor={`${field.name}-client-id`}>
+                Client ID
+              </FieldLabel>
+              <Input
+                id={`${field.name}-client-id`}
+                placeholder="Paste Client ID from GitHub"
+                value={field.state.value.clientId}
+                onChange={(e) =>
+                  field.handleChange({
+                    ...field.state.value,
+                    clientId: e.target.value,
+                  })
+                }
+              />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor={`${field.name}-client-secret`}>
+                Client Secret
+              </FieldLabel>
+              <Input
+                id={`${field.name}-client-secret`}
+                type="password"
+                placeholder="Paste Client Secret from GitHub"
+                value={field.state.value.clientSecret}
+                onChange={(e) =>
+                  field.handleChange({
+                    ...field.state.value,
+                    clientSecret: e.target.value,
+                  })
+                }
+              />
+            </Field>
+          </FieldGroup>
+        </div>
+      </FieldSet>
+    </FieldGroup>
+  );
+}
+
 export const { useAppForm, withForm } = createFormHook({
   fieldComponents: {
     TextField,
@@ -529,6 +691,7 @@ export const { useAppForm, withForm } = createFormHook({
     RadioGroupField,
     CheckboxField,
     CheckboxArrayField,
+    GithubAuthProviderField,
   },
   formComponents: {
     // SubscribeButton,

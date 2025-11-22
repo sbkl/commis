@@ -22,7 +22,7 @@
     "@commis/schemas": "workspace:*",
     "@commis/ui": "workspace:*",
     "@convex-dev/auth": "catalog:convex",
-    "@convex-dev/react-query": "^0.0.0-alpha.11",
+    "@convex-dev/react-query": "^0.1.0",
     "@tanstack/react-query": "^5.90.7",
     "@uiw/codemirror-theme-vscode": "^4.23.6",
     "@uiw/react-codemirror": "^4.23.6",

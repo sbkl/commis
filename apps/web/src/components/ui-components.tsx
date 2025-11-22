@@ -6,12 +6,23 @@ import { api } from "@commis/api/src/convex/_generated/api";
 import { Button } from "@commis/ui/components/button";
 import { Field, FieldContent, FieldGroup } from "@commis/ui/components/field";
 import { useAppForm } from "@commis/ui/components/form";
-import z from "zod/v3";
+import z from "zod/v4";
 import { useProject } from "./projects/provider";
 import { toast } from "sonner";
 import { Spinner } from "@commis/ui/components/spinner";
-import { zid } from "convex-helpers/server/zod";
+import { zid } from "convex-helpers/server/zod4";
 import { ScrollArea } from "@commis/ui/components/scroll-area";
+import { Preloaded, usePreloadedQuery } from "convex/react";
+import { SearchInput } from "./search";
+import {
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@commis/ui/components/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+} from "@commis/ui/components/dropdown-menu";
+import { ChevronDownIcon } from "lucide-react";
 
 export const uiComponentsSchema = z.object({
   uiComponents: z.array(
@@ -22,8 +33,15 @@ export const uiComponentsSchema = z.object({
   ),
 });
 
-export function UiComponents() {
-  const { project, uiComponents } = useProject();
+interface UiComponentsProps {
+  preloadedUiComponentsQuery: Preloaded<typeof api.uiComponents.query.list>;
+}
+
+export function UiComponents({
+  preloadedUiComponentsQuery,
+}: UiComponentsProps) {
+  const { project } = useProject();
+  const uiComponentsQuery = usePreloadedQuery(preloadedUiComponentsQuery);
 
   const createMany = useMutation(api.uiComponents.mutation.upsert, {
     onSuccess: () => {
@@ -38,7 +56,7 @@ export function UiComponents() {
       })),
     },
     validators: {
-      onSubmit: uiComponentsSchema,
+      onSubmit: uiComponentsSchema as any,
     },
     onSubmit: (values) => {
       createMany.mutate({
@@ -54,25 +72,43 @@ export function UiComponents() {
         e.preventDefault();
         form.handleSubmit(e);
       }}
-      className="max-w-4xl"
+      className="max-w-4xl mx-auto py-12 px-4"
     >
-      <FieldGroup className="">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-bold">UI Components</h3>
+        <div className="flex items-center gap-2">
+          <SearchInput />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                Shadcn <ChevronDownIcon className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem>Shadcn</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
+      <FieldGroup className="mt-8">
         <FieldContent>
           <form.AppField
             name="uiComponents"
             mode="array"
             children={(field) => (
               <field.CheckboxArrayField
-                label="UI Components"
                 container={(children) => {
                   return (
-                    <ScrollArea className="w-full h-[calc(var(--project-content-height)-var(--bottom-option-height)-82px)]">
-                      <div className="px-4">{children}</div>
+                    <ScrollArea className="w-full h-[calc(var(--project-content-height)-var(--bottom-option-height))]">
+                      <div className="px-4 grid grid-cols-4 gap-4">
+                        {children}
+                      </div>
                     </ScrollArea>
                   );
                 }}
                 options={
-                  uiComponents?.map((c) => {
+                  uiComponentsQuery?.map((c) => {
                     return {
                       label: c.label,
                       value: c._id,

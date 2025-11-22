@@ -41,8 +41,8 @@
     "catalogs": {
       "convex": {
         "@convex-dev/auth": "^0.0.90",
-        "convex": "^1.29.1",
-        "convex-helpers": "^0.1.104"
+        "convex": "^1.29.3",
+        "convex-helpers": "^0.1.105"
       },
       "react": {
         "@types/react": "^19.1.9",

@@ -135,3 +135,104 @@ export function getInitCommand(
       throw new Error(`Unsupported framework: ${framework}`);
   }
 }
+
+/**
+ * Get the CLI package root directory
+ */
+function getCliRootDir(): string {
+  // In the bundled output (dist/index.cjs), __dirname points to the dist folder
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore - __dirname is available in the bundled CommonJS output
+  const currentDir = __dirname;
+
+  // If we're in dist folder, go up one level to package root
+  if (currentDir.includes("/dist")) {
+    return path.resolve(currentDir, "..");
+  }
+
+  // If we're in src/utils during development, go up two levels
+  return path.resolve(currentDir, "../..");
+}
+
+/**
+ * Copy a single template file from CLI package to project directory
+ *
+ * @param sourceFile - Path to template file relative to CLI package root (e.g., "src/templates/auth/convex/auth.ts")
+ * @param destinationFile - Path relative to project working directory (e.g., "src/convex/auth.ts")
+ * @param workingDir - The project's working directory
+ */
+export async function copyTemplateFile(
+  sourceFile: string,
+  destinationFile: string,
+  workingDir: string
+): Promise<void> {
+  const cliRoot = getCliRootDir();
+  const sourcePath = path.join(cliRoot, sourceFile);
+  const destinationPath = path.join(workingDir, destinationFile);
+
+  // Verify source file exists
+  if (!(await fs.pathExists(sourcePath))) {
+    throw new Error(`Template file not found: ${sourcePath}`);
+  }
+
+  // Ensure destination directory exists
+  await fs.ensureDir(path.dirname(destinationPath));
+
+  // Read the file content
+  let content = await fs.readFile(sourcePath, "utf-8");
+
+  // Remove // @ts-nocheck annotation (with optional whitespace)
+  content = content.replace(/^\/\/\s*@ts-nocheck\s*\n?/m, "");
+
+  // Write the modified content to destination (overwrites if exists)
+  await fs.writeFile(destinationPath, content, "utf-8");
+
+  console.log(`  ✅ Copied ${path.basename(sourceFile)} to ${destinationFile}`);
+}
+
+/**
+ * Copy template files from CLI package to project directory
+ *
+ * @param source - Path to template files relative to CLI package root (e.g., "src/templates/auth/convex")
+ * @param destination - Path relative to project working directory (e.g., "src/convex")
+ * @param workingDir - The project's working directory
+ */
+export async function copyTemplateFiles(
+  source: string,
+  destination: string,
+  workingDir: string
+): Promise<void> {
+  const cliRoot = getCliRootDir();
+  const sourcePath = path.join(cliRoot, source);
+  const destinationPath = path.join(workingDir, destination);
+
+  // Verify source exists
+  if (!(await fs.pathExists(sourcePath))) {
+    throw new Error(`Template source not found: ${sourcePath}`);
+  }
+
+  // Ensure destination directory exists
+  await fs.ensureDir(destinationPath);
+
+  // Copy all files from source to destination
+  await fs.copy(sourcePath, destinationPath, {
+    overwrite: true,
+  });
+
+  console.log(`  ✅ Copied templates from ${source} to ${destination}`);
+}
+
+interface RunConvexDevProps {
+  convexTeamSlug: string;
+  convexProjectSlug: string;
+  projectPath: string;
+}
+export function runConvexDev(
+  pmx: string,
+  { convexTeamSlug, convexProjectSlug, projectPath }: RunConvexDevProps
+): void {
+  executeCommand(
+    `${pmx} convex dev --once --configure existing --team ${convexTeamSlug} --project ${convexProjectSlug} --dev-deployment cloud --tail-logs disable`,
+    projectPath
+  );
+}

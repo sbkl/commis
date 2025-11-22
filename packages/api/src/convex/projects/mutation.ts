@@ -3,7 +3,7 @@ import {
   frameworkSchema,
   packageManagerSchema,
 } from "@commis/schemas/projects";
-import { zodToConvex } from "convex-helpers/server/zod";
+import { zodToConvex } from "convex-helpers/server/zod4";
 import { ConvexError, v } from "convex/values";
 import { generateSlug } from "../shared/utils";
 import { internal } from "../_generated/api";

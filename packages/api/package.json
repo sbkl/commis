@@ -23,7 +23,7 @@
     "convex-helpers": "catalog:convex",
     "date-fns": "catalog:",
     "hono": "^4.7.2",
-    "jose": "^6.1.1",
+    "jose": "^6.1.2",
     "jsonwebtoken": "^9.0.2",
     "slug": "^10.0.0"
   },

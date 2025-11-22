@@ -5,9 +5,14 @@ import { Authenticated } from "convex/react";
 import { CheckCircle2, Circle, Loader2 } from "lucide-react";
 import * as React from "react";
 import { useProject } from "@/components/projects/provider";
-import { Card, CardHeader, CardTitle } from "@commis/ui/components/card";
+import {
+  Card,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@commis/ui/components/card";
 import Link from "next/link";
-import { cn } from "@commis/ui/lib/utils";
+import { Badge } from "@commis/ui/components/badge";
 
 function InstallationProgress() {
   const { project } = useProject();
@@ -87,51 +92,39 @@ function InstallationProgress() {
   );
 }
 
-export function ConvexDashboard() {
-  const { project } = useProject();
-  const iframeRef = React.useRef<HTMLIFrameElement>(null);
-
-  React.useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      // We first wait for the iframe to send a dashboard-credentials-request message.
-      // This makes sure that we don't send the credentials until the iframe is ready.
-      if (event.data?.type !== "dashboard-credentials-request") {
-        return;
-      }
-      iframeRef.current?.contentWindow?.postMessage(
-        {
-          type: "dashboard-credentials",
-          adminKey: project.adminKey,
-          deploymentUrl: project.convexDeploymentUrl,
-          deploymentName: project.convexDeploymentName,
-          // Optional: specify which pages to show
-          // visiblePages: ["data"],
-        },
-        "*"
-      );
-    };
-
-    window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
-  }, [
-    project.convexDeploymentUrl,
-    project.adminKey,
-    project.convexDeploymentName,
-  ]);
-
+function ProjectCard({
+  href,
+  title,
+  status,
+}: {
+  href: string;
+  title: string;
+  status?: string;
+}) {
   return (
-    <iframe
-      ref={iframeRef}
-      // You can also default on other pages, for instance /functions, /files or /logs
-      src="https://dashboard-embedded.convex.dev/data"
-      allow="clipboard-write"
-      className="w-full h-full"
-    />
+    <Link href={href} className="group">
+      <Card className="h-64">
+        <CardHeader>
+          <CardTitle className="group-hover:underline">{title}</CardTitle>
+        </CardHeader>
+        {status && (
+          <CardFooter>
+            <Badge variant="outline">{status}</Badge>
+          </CardFooter>
+        )}
+      </Card>
+    </Link>
   );
 }
 
+const projectCards = [
+  { href: "/features", title: "Features" },
+  { href: "/convex-components", title: "Convex Components" },
+  { href: "/ui-components", title: "UI Components" },
+];
+
 export function ProjectContent() {
-  const { project, isDashboardOpen } = useProject();
+  const { project } = useProject();
 
   const isCompleted = project.status === "created";
 
@@ -143,45 +136,18 @@ export function ProjectContent() {
         ) : (
           <>
             <div className="grid grid-cols-2 gap-8 max-w-3xl mx-auto py-12">
-              <Link
+              <ProjectCard
                 href={`/p/${project.slug}/authentication`}
-                className="group"
-              >
-                <Card className="h-64">
-                  <CardHeader>
-                    <CardTitle className="group-hover:underline">
-                      Authentication
-                    </CardTitle>
-                  </CardHeader>
-                </Card>
-              </Link>
-              <Card className="h-64">
-                <CardHeader>
-                  <CardTitle>Features</CardTitle>
-                </CardHeader>
-              </Card>
-              <Card className="h-64">
-                <CardHeader>
-                  <CardTitle>Convex Components</CardTitle>
-                </CardHeader>
-              </Card>
-              <Card className="h-64">
-                <CardHeader>
-                  <CardTitle>UI Components</CardTitle>
-                </CardHeader>
-              </Card>
-            </div>
-            <div
-              className={cn(
-                "absolute inset-x-6 bottom-6 top-18 z-[var(--z-index-max)] overflow-hidden rounded-2xl transition-all duration-300",
-                {
-                  "opacity-0 pointer-events-none translate-y-2":
-                    !isDashboardOpen,
-                  "opacity-100 translate-y-0": isDashboardOpen,
-                }
-              )}
-            >
-              <ConvexDashboard />
+                title="Authentication"
+                status={project.authentication?.status}
+              />
+              {projectCards.map((card) => (
+                <ProjectCard
+                  key={card.href}
+                  href={`/p/${project.slug}${card.href}`}
+                  title={card.title}
+                />
+              ))}
             </div>
           </>
         )}

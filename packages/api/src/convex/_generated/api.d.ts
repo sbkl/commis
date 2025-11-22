@@ -8,7 +8,6 @@
  * @module
  */
 
-import type * as apiTokens_internal_action from "../apiTokens/internal/action.js";
 import type * as apiTokens_internal_mutation from "../apiTokens/internal/mutation.js";
 import type * as apiTokens_internal_query from "../apiTokens/internal/query.js";
 import type * as apiTokens_mutation from "../apiTokens/mutation.js";
@@ -16,6 +15,12 @@ import type * as apiTokens_query from "../apiTokens/query.js";
 import type * as apiTokens_table from "../apiTokens/table.js";
 import type * as apiTokens_utils from "../apiTokens/utils.js";
 import type * as auth from "../auth.js";
+import type * as authentications_cli_mutation from "../authentications/cli/mutation.js";
+import type * as authentications_cli_query from "../authentications/cli/query.js";
+import type * as authentications_internal_action from "../authentications/internal/action.js";
+import type * as authentications_internal_mutation from "../authentications/internal/mutation.js";
+import type * as authentications_mutation from "../authentications/mutation.js";
+import type * as authentications_table from "../authentications/table.js";
 import type * as cliAuth_mutation from "../cliAuth/mutation.js";
 import type * as cliAuth_query from "../cliAuth/query.js";
 import type * as cliAuth_table from "../cliAuth/table.js";
@@ -41,6 +46,7 @@ import type * as uiComponents_cli_mutation from "../uiComponents/cli/mutation.js
 import type * as uiComponents_cli_query from "../uiComponents/cli/query.js";
 import type * as uiComponents_internal_mutation from "../uiComponents/internal/mutation.js";
 import type * as uiComponents_mutation from "../uiComponents/mutation.js";
+import type * as uiComponents_query from "../uiComponents/query.js";
 import type * as uiComponents_table from "../uiComponents/table.js";
 import type * as users_cli_mutation from "../users/cli/mutation.js";
 import type * as users_cli_query from "../users/cli/query.js";
@@ -57,7 +63,6 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  "apiTokens/internal/action": typeof apiTokens_internal_action;
   "apiTokens/internal/mutation": typeof apiTokens_internal_mutation;
   "apiTokens/internal/query": typeof apiTokens_internal_query;
   "apiTokens/mutation": typeof apiTokens_mutation;
@@ -65,6 +70,12 @@ declare const fullApi: ApiFromModules<{
   "apiTokens/table": typeof apiTokens_table;
   "apiTokens/utils": typeof apiTokens_utils;
   auth: typeof auth;
+  "authentications/cli/mutation": typeof authentications_cli_mutation;
+  "authentications/cli/query": typeof authentications_cli_query;
+  "authentications/internal/action": typeof authentications_internal_action;
+  "authentications/internal/mutation": typeof authentications_internal_mutation;
+  "authentications/mutation": typeof authentications_mutation;
+  "authentications/table": typeof authentications_table;
   "cliAuth/mutation": typeof cliAuth_mutation;
   "cliAuth/query": typeof cliAuth_query;
   "cliAuth/table": typeof cliAuth_table;
@@ -90,6 +101,7 @@ declare const fullApi: ApiFromModules<{
   "uiComponents/cli/query": typeof uiComponents_cli_query;
   "uiComponents/internal/mutation": typeof uiComponents_internal_mutation;
   "uiComponents/mutation": typeof uiComponents_mutation;
+  "uiComponents/query": typeof uiComponents_query;
   "uiComponents/table": typeof uiComponents_table;
   "users/cli/mutation": typeof users_cli_mutation;
   "users/cli/query": typeof users_cli_query;

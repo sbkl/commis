@@ -6,7 +6,7 @@ import {
   frameworkSchema,
   packageManagerSchema,
 } from "@commis/schemas/projects";
-import z from "zod/v3";
+import z from "zod";
 import { Button } from "@commis/ui/components/button";
 import { Field, FieldGroup } from "@commis/ui/components/field";
 import {

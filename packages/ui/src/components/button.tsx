@@ -7,7 +7,7 @@ import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@commis/ui/components//tooltip";
+} from "@commis/ui/components/tooltip";
 import { Spinner } from "@commis/ui/components/spinner";
 import { LucideIcon } from "lucide-react";
 

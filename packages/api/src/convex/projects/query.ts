@@ -35,6 +35,11 @@ export const protectedFindOrThrow = protectedQuery({
     if (!project) {
       throw new ConvexError("Project not found");
     }
+    const authentication = await ctx.db
+      .query("authentications")
+      .withIndex("projectId", (q) => q.eq("projectId", project._id))
+      .unique();
+
     const uiComponents = await Promise.all(
       (
         await ctx.db
@@ -53,18 +58,10 @@ export const protectedFindOrThrow = protectedQuery({
         };
       })
     );
-
-    const allUiComponents = await ctx.db
-      .query("uiComponents")
-      .withIndex("vendor_name")
-      .collect();
-
     return {
-      project: {
-        ...project,
-        uiComponents,
-      },
-      uiComponents: allUiComponents,
+      ...project,
+      authentication,
+      uiComponents,
     };
   },
 });

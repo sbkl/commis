@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { cliProtectedMutation } from "../../functions";
-import { zodToConvex } from "convex-helpers/server/zod";
+import { zodToConvex } from "convex-helpers/server/zod4";
 import { uiComponentStatusSchema } from "@commis/schemas/uiComponents";
 
 export const patchStatus = cliProtectedMutation({

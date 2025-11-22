@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { cliProtectedQuery } from "../../functions";
 import { projectStatusSchema } from "@commis/schemas/projects";
-import { zodToConvex } from "convex-helpers/server/zod";
+import { zodToConvex } from "convex-helpers/server/zod4";
 
 export const list = cliProtectedQuery({
   args: {

@@ -1,10 +1,23 @@
-import z from "zod/v3";
+import { zid } from "convex-helpers/server/zod4";
+import z from "zod";
 
 export const authenticationProviderSchema = z.object({
   provider: z.enum(["convex", "clerk", "workos"]),
   dependencies: z.array(z.string()),
   commands: z.array(z.string()),
   imports: z.array(z.string()),
+});
+
+export const authenticationStatusSchema = z.enum(["init", "pending", "installing", "completed", "failed"]);
+
+export const authenticationSchema = z.object({
+  projectId: zid("projects"),
+  userId: zid("users"),
+  provider: z.enum(["convex", "clerk", "workos"]),
+  oauthProvider: z.enum(["github"]),
+  clientId: z.string(),
+  clientSecret: z.string(),
+  status: authenticationStatusSchema,
 });
 
 // Convex Auth

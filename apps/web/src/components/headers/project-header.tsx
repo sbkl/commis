@@ -1,26 +1,40 @@
 "use client";
 
-import { Button } from "@commis/ui/components/button";
 import { useProject } from "../projects/provider";
 import { AppHeader } from "./app-header";
-import { Separator } from "@commis/ui/components/separator";
+import { ConvexDashboard } from "../projects/convex-dashboard";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from "@commis/ui/components/breadcrumb";
+import Link from "next/link";
 
 export function ProjectHeader() {
-  const { project, setIsDashboardOpen, isDashboardOpen } = useProject();
+  const { project } = useProject();
   return (
     <AppHeader>
       <div className="flex-1 h-full flex items-center justify-between px-6">
-        <div className="flex items-center gap-2 h-full">
-          <Separator orientation="vertical" className="h-full" />
-          <h2 className="ml-4">{project.name}</h2>
+        <div className="flex items-center gap-2 h-full text-sm">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href="/">Home</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href={`/p/${project.slug}`}>{project.name}</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
         </div>
-        <Button
-          size="sm"
-          disabled={!project.convexDeploymentName}
-          onClick={() => setIsDashboardOpen((prev) => !prev)}
-        >
-          {isDashboardOpen ? "Close Dashboard" : "Open Dashboard"}
-        </Button>
+        <ConvexDashboard />
       </div>
     </AppHeader>
   );

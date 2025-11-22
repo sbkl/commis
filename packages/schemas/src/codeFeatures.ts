@@ -1,5 +1,5 @@
-import { zid } from "convex-helpers/server/zod";
-import { z } from "zod/v3";
+import { zid } from "convex-helpers/server/zod4";
+import { z } from "zod";
 
 export const codeFeatureSchema = z.object({
   userId: zid("users"),

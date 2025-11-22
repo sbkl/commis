@@ -14,6 +14,9 @@ import {
   getPackageManagerExec,
   installDeps,
   uiComponentsVendorCommands,
+  copyTemplateFile,
+  copyTemplateFiles,
+  runConvexDev,
 } from "../utils/helpers";
 
 /**
@@ -69,8 +72,6 @@ async function initializeProject(
 
     // Create convex.json configuration file
     const convexConfig = {
-      $schema:
-        "https://raw.githubusercontent.com/get-convex/convex-backend/refs/heads/main/npm-packages/convex/schemas/convex.schema.json",
       functions: "src/convex/",
     };
     const convexConfigPath = path.join(projectPath, "convex.json");
@@ -78,15 +79,41 @@ async function initializeProject(
     console.log(`  ✅ Created convex.json`);
 
     // Install Convex package
-    installDeps(project.packageManager, ["convex"], projectPath);
+    installDeps(
+      project.packageManager,
+      ["convex", "convex-helpers"],
+      projectPath
+    );
 
     // Initialize Convex with automatic new project creation
     // --once: Run setup once and exit
     // --configure=new: Automatically create a new Convex project
     console.log(`  ℹ️  Initializing Convex project for ${project.name}...`);
-    executeCommand(
-      `${pmx} convex dev --once --configure existing --team ${project.convexTeamSlug} --project ${project.convexSlug} --dev-deployment cloud --tail-logs disable`,
+
+    runConvexDev(pmx, {
+      convexTeamSlug: `${project.convexTeamSlug}`,
+      convexProjectSlug: `${project.convexSlug}`,
+      projectPath,
+    });
+
+    // Install general dependencies
+    installDeps(
+      project.packageManager,
+      ["@tanstack/react-query", "@convex-dev/react-query", "zod"],
       projectPath
+    );
+
+    // Copy Convex tsconfig.json template
+    await copyTemplateFile(
+      "src/templates/tsconfig/convex/tsconfig.json",
+      path.join(project.slug, "src/convex/tsconfig.json"),
+      workingDir
+    );
+
+    await copyTemplateFiles(
+      "src/templates/hooks",
+      path.join(project.slug, "src/hooks"),
+      workingDir
     );
 
     // Install shadcn
@@ -126,25 +153,6 @@ async function initializeProject(
       console.log(`  ✅ Updated root tsconfig.json`);
     }
 
-    // Update src/convex/tsconfig.json
-    const convexTsConfigPath = path.join(
-      projectPath,
-      "src",
-      "convex",
-      "tsconfig.json"
-    );
-    if (await fs.pathExists(convexTsConfigPath)) {
-      await addCompilerOptions(convexTsConfigPath, {
-        noUncheckedIndexedAccess: true,
-        noUnusedLocals: true,
-        noUnusedParameters: true,
-        paths: {
-          "@/*": ["../../src/*"],
-        },
-      });
-      console.log(`  ✅ Updated src/convex/tsconfig.json`);
-    }
-
     // Mark as created
     await mutation(api.projects.cli.mutation.patchStatus, {
       slug: project.slug,
@@ -166,6 +174,7 @@ export async function dev(): Promise<void> {
   // Track UI components currently being installed to prevent duplicates
   const installingProjects = new Set<string>();
   const installingComponents = new Set<string>();
+  const installingAuthentications = new Set<string>();
 
   const unsubscribers: Array<() => void> = [];
 
@@ -186,6 +195,98 @@ export async function dev(): Promise<void> {
         } finally {
           installingProjects.delete(project._id);
         }
+      }
+    }
+  );
+
+  const pendingAuthenticationsUnsubscribe = await onQueryUpdate(
+    api.authentications.cli.query.list,
+    { status: "pending" },
+    async (value) => {
+      console.log("Pending authentications: ", value.length);
+      for (const authentication of value) {
+        if (installingAuthentications.has(authentication._id)) {
+          continue;
+        }
+        installingAuthentications.add(authentication._id);
+        await mutation(api.authentications.cli.mutation.patchStatus, {
+          id: authentication._id,
+          status: "installing",
+        });
+        const projectPath = path.join(workingDir, authentication.project.slug);
+
+        console.log(
+          `🔐 Setting up authentication for ${authentication.project.slug}...`
+        );
+
+        // Install authentication and providers dependencies
+        installDeps(
+          authentication.project.packageManager,
+          [
+            "@convex-dev/auth",
+            "@auth/core@0.37.0",
+            "nuqs",
+            "next-themes",
+            "react-icons",
+          ],
+          projectPath
+        );
+
+        // Copy authentication template files individually
+        await copyTemplateFiles(
+          "src/templates/auth/convex/nextjs/convex",
+          path.join(authentication.project.slug, "src/convex"),
+          workingDir
+        );
+
+        await copyTemplateFiles(
+          "src/templates/convex",
+          path.join(authentication.project.slug, "src/convex"),
+          workingDir
+        );
+
+        await copyTemplateFiles(
+          "src/templates/schemas",
+          path.join(authentication.project.slug, "src/schemas"),
+          workingDir
+        );
+
+        await copyTemplateFiles(
+          "src/templates/auth/convex/nextjs/components",
+          path.join(authentication.project.slug, "src/components"),
+          workingDir
+        );
+
+        await copyTemplateFiles(
+          "src/templates/auth/convex/nextjs/app",
+          path.join(authentication.project.slug, "src/app"),
+          workingDir
+        );
+
+        await copyTemplateFile(
+          "src/templates/auth/convex/nextjs/proxy.ts",
+          path.join(authentication.project.slug, "src/proxy.ts"),
+          workingDir
+        );
+
+        const pmx = getPackageManagerExec(
+          authentication.project.packageManager
+        );
+
+        runConvexDev(pmx, {
+          convexTeamSlug: `${authentication.project.convexTeamSlug}`,
+          convexProjectSlug: `${authentication.project.convexSlug}`,
+          projectPath,
+        });
+
+        await mutation(api.authentications.cli.mutation.patchStatus, {
+          id: authentication._id,
+          status: "completed",
+        });
+
+        console.log(
+          `  ✅ Authentication setup complete for ${authentication.project.slug}`
+        );
       }
     }
   );
@@ -230,6 +331,7 @@ export async function dev(): Promise<void> {
 
   unsubscribers.push(projectListUnsubscribe);
   unsubscribers.push(pendingUiComponentsUnsubscribe);
+  unsubscribers.push(pendingAuthenticationsUnsubscribe);
 
   console.log(`🌐 Synced and ready to work!`);
   process.on("SIGINT", () => {
