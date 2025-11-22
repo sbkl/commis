@@ -1,26 +1,25 @@
 // @ts-nocheck
+import { ConvexError } from "convex/values";
+import * as ConvexBase from "@/convex/_generated/server";
+import type { DataModel } from "@/convex/_generated/dataModel";
 import {
   type Rules,
   wrapDatabaseReader,
   wrapDatabaseWriter,
 } from "convex-helpers/server/rowLevelSecurity";
-import { ConvexError } from "convex/values";
 import { Triggers } from "convex-helpers/server/triggers";
-import type { DataModel, Doc } from "@/convex/_generated/dataModel";
-import * as VanillaConvex from "@/convex/_generated/server";
-import * as ConvexBase from "@/convex/_generated/server";
-import { getActCurrentUser, getCurrentUser } from "@/convex/users/utils";
 import {
   customAction,
   customCtx,
   customMutation,
   customQuery,
 } from "convex-helpers/server/customFunctions";
+import { findCurrentUser } from "@/convex/users/utils";
 
 export const triggers = new Triggers<DataModel>();
 
 async function rlsRules(ctx: ConvexBase.QueryCtx) {
-  const user = await getCurrentUser(ctx);
+  const user = await findCurrentUser(ctx);
   return {
     rules: {} satisfies Rules<ConvexBase.QueryCtx, DataModel>,
     user,
@@ -28,7 +27,7 @@ async function rlsRules(ctx: ConvexBase.QueryCtx) {
 }
 
 export const publicQuery = customQuery(
-  VanillaConvex.query,
+  ConvexBase.query,
   customCtx(async (ctx: ConvexBase.QueryCtx) => {
     const { rules, user } = await rlsRules(ctx);
     return {
@@ -56,7 +55,7 @@ export const protectedQuery = customQuery(
 
 export const internalQuery = customQuery(
   ConvexBase.internalQuery,
-  customCtx(async (ctx: ConvexBase.QueryCtx) => {
+  customCtx(async (ctx) => {
     const { rules } = await rlsRules(ctx);
     return {
       db: wrapDatabaseReader(ctx, ctx.db, rules),
@@ -105,7 +104,7 @@ export const internalMutation = customMutation(
 export const publicAction = customAction(
   ConvexBase.action,
   customCtx(async (ctx: ConvexBase.ActionCtx) => {
-    const user = (await getActCurrentUser(ctx)) as Doc<"users"> | null;
+    const user = await findCurrentUser(ctx);
     return {
       user,
     };
@@ -115,7 +114,7 @@ export const publicAction = customAction(
 export const protectedAction = customAction(
   ConvexBase.action,
   customCtx(async (ctx: ConvexBase.ActionCtx) => {
-    const user = (await getActCurrentUser(ctx)) as Doc<"users"> | null;
+    const user = await findCurrentUser(ctx);
     if (!user) throw new ConvexError("Unauthorized");
     return {
       user,
